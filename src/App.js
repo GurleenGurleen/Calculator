@@ -9,12 +9,27 @@ export const ACTIONS = {
   CLEAR: 'clear',
   DELETE: 'delete-digit',
   EVALUATE: 'evaluate',
-  RESULT: 'result'
 }
 
 const reducer = (state, { type, payload }) => {
   switch (type) {
     case ACTIONS.ADD_DIGIT:
+
+      if (state.overwrite) {
+        return {
+          ...state,
+          currentOperand: payload.digit,
+          overwrite: false
+        }
+      }
+
+      if (state.operator === '=') {
+        return {
+          ...state,
+          operator: null
+        }
+      }
+
       if (payload.digit === '0' && state.currentOperand === '0') return state
       if (payload.digit === '.' && state.currentOperand.includes(".")) return state
       return {
@@ -23,6 +38,14 @@ const reducer = (state, { type, payload }) => {
       }
 
     case ACTIONS.CHOOSE_OPERATION:
+
+      if (state.currentOperand === null) {
+        return {
+          ...state,
+          operator: payload.operator,
+        }
+      }
+
       if (state.currentOperand == null && state.previousOperand == null) {
         return state;
       }
@@ -35,6 +58,7 @@ const reducer = (state, { type, payload }) => {
           currentOperand: null
         }
       }
+
       return {
         ...state,
         previousOperand: evaluate(state),
@@ -44,7 +68,7 @@ const reducer = (state, { type, payload }) => {
 
     case ACTIONS.DELETE:
 
-      if (state.currentOperand == null || state.operator.includes("=")) {
+      if (state.currentOperand == null) {
         return state;
       }
       return {
@@ -60,10 +84,23 @@ const reducer = (state, { type, payload }) => {
         previousOperand: null
 
       }
-    default:
-      return {
-        state
+
+    case ACTIONS.EVALUATE:
+      if (state.operator == null || state.currentOperand == null || state.previousOperand == null) {
+        return state
       }
+
+      return {
+        ...state,
+        overwrite: true,
+        previousOperand: null,
+        operator: null,
+        currentOperand: evaluate(state)
+      }
+
+    default:
+      return state
+
   }
 }
 
@@ -87,9 +124,7 @@ const evaluate = ({ currentOperand, previousOperand, operator }) => {
     case "x":
       computation = previous * current
       break
-
   }
-
   return computation.toString()
 }
 
@@ -125,7 +160,7 @@ function App() {
           <td><OperatorButton operator='+' dispatch={dispatch} /></td>
           <td><DigitButton digit='0' dispatch={dispatch} /></td>
           <td><DigitButton digit='.' dispatch={dispatch} /></td>
-          <td><OperatorButton operator='=' dispatch={dispatch} /></td>
+          <td><button onClick={() => { dispatch({ type: ACTIONS.EVALUATE }) }}>=</button></td>
 
         </tr>
 
