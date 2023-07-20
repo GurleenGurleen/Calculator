@@ -14,6 +14,7 @@ table {
   background-color: wheat;
   height: 60%;
   width: 50%;
+  border-collapse: collapse;
 }
 
 
@@ -26,6 +27,18 @@ button {
 
 .resultDisplay {
   width: 100%;
+}
+
+.del {
+  width: 50%;
+}
+
+.clear {
+  width: 50%;
+}
+
+.t-2 {
+  height: 15%;
 }
 
 
